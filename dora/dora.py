@@ -12,11 +12,11 @@ def get_node_color(env):
     ''' get color of each node according to environment '''
     if env == 'prod':
         node_color = '#e24d4d'
-    elif env == 'eu':
+    elif env == 'tx':
         node_color = 'grey'
     elif env == 'dmz':
         node_color = '#cc99ff'
-    elif env == 'bidstrading':
+    elif env == 'dev':
         node_color = '#c4ffaa'
     elif env == 'test':
         node_color = '#66ffff'
