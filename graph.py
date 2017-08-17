@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 
-import networkx as nx
-import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import json
 
-G=nx.Graph()
-G.add_node("a")
-G.add_nodes_from(["b","c"])
 
-G.add_edge(1,2)
-edge = ("d", "e")
-G.add_edge(*edge)
-edge = ("a", "b")
-G.add_edge(*edge)
+if __name__ == '__main__':
 
-print("Nodes of graph: ")
-print(G.nodes())
-print("Edges of graph: ")
-print(G.edges())
+	x = np.arange(100)
+	y = x*x
+	z = x*x + 10*x
 
-G.add_edges_from([("a","c"),("c","d"), ("a",1), (1,"d"), ("a",2)])
+	with open("style.json") as json_file:
+	    s = json.load(json_file)
 
-nx.draw(G)
-plt.savefig("simple_path.png") # save as png
-plt.show() # display
+
+	plt.rcParams.update(s)
+
+	plt.plot(x,y,label='Y=x*x');
+	plt.plot(x,z,label='Y=x*x+10*x');
+	plt.title('Nice JSON example');
+	plt.legend();
+	plt.plot();
+	plt.savefig('json_example.png')
