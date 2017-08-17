@@ -1,25 +1,32 @@
 #!/usr/bin/env python
 
-import matplotlib.pyplot as plt
-import numpy as np
-import json
+# Dora the Explora!
+
+from __future__ import print_function
+from dora.dora import *
+
+role_names = []
+class_names = []
+json_dir = 'servers'
+selected_role = 'webserver'
+selected_class = 'nagios::common'
+graph_format = 'png'
 
 
-if __name__ == '__main__':
-
-	x = np.arange(100)
-	y = x*x
-	z = x*x + 10*x
-
-	with open("style.json") as json_file:
-	    s = json.load(json_file)
+# get all available Puppet Roles and Classes from JSON data
+all_puppet_roles = get_all_roles(json_dir)
+all_puppet_classes = get_all_classes(json_dir)
 
 
-	plt.rcParams.update(s)
 
-	plt.plot(x,y,label='Y=x*x');
-	plt.plot(x,z,label='Y=x*x+10*x');
-	plt.title('Nice JSON example');
-	plt.legend();
-	plt.plot();
-	plt.savefig('json_example.png')
+generate_graph(json_dir, graph_format, 'role', selected_role)
+generate_graph(json_dir, graph_format, 'classes', selected_class)
+# generate_class_graph
+
+#graph.write_svg('test.svg')
+
+
+
+
+
+
