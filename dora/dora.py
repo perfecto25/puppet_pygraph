@@ -16,7 +16,7 @@ def get_node_color(env):
         node_color = 'grey'
     elif env == 'dmz':
         node_color = '#cc99ff'
-    elif env == 'njo':
+    elif env == 'nyc':
         node_color = '#c4ffaa'
     elif env == 'test':
         node_color = '#66ffff'
@@ -36,7 +36,11 @@ def get_all_roles(json_dir):
     # get all Roles and Classes - turn this into function
     for filename in glob.glob(json_dir+'/*'):
         with open(filename) as json_data:
-            data = json.load(json_data)
+            try:
+                data = json.load(json_data)
+            except ValueError, e:
+                print('Decoding JSON has failed: %s' % hostname)
+                print(e)
 
             try:
                 role = data['role']
@@ -81,11 +85,16 @@ def generate_graph(json_dir, graph_format, sel_type, sel_value):
     env_hash = {}
     host_list = []
 
-    node_count = 0 # total # of nodes in graph
+    node_count = 0  # total # of nodes in graph
 
     for filename in glob.glob(json_dir+'/*'):
         with open(filename) as json_data:
-            data = json.load(json_data)
+            try:
+                data = json.load(json_data)
+            except ValueError, e:
+                print('Decoding JSON has failed: %s' % hostname)
+                print(e)
+
             hostname =  get_hostname(filename)
             env = get_environment(filename)
 
@@ -112,29 +121,50 @@ def generate_graph(json_dir, graph_format, sel_type, sel_value):
 
     #total_nodes = len(host_list)   # total # of child nodes
     midpoint = (len(host_list) - 1)/2   # calculates mid
-    print('total len: %s' % len(host_list))
+    #print('total len: %s' % len(host_list))
+    #print('midpoint %s' % midpoint)
+
     # now graph it
-    graph = pydot.Dot(graph_type='graph', graph_name='XXI')
+    graph = pydot.Dot(graph_type='graph', label='Puppet %s\n\n' % sel_type.title(), 
+                        labelloc='top', rankdir='TB', graph_layout='shell', pad="1")
     primary_node = pydot.Node("%s" % '"{0}"'.format(sel_value), style='filled', shape='egg', fillcolor='white')
     graph.add_node(primary_node)
 
     for env in env_hash:
+
         node_color = get_node_color(env)
+
         for hostname in env_hash[env]:
-            child_node = pydot.Node("%s" % hostname+'.'+env, style="filled", shape='box', fillcolor=node_color)
+            child_node = pydot.Node("%s" % hostname+'.'+env, style="filled", shape='box', fontname='Arial', 
+                                fontsize=10, fillcolor=node_color, margin='0.1')
             graph.add_node(child_node)
-            graph.add_edge(pydot.Edge(primary_node, child_node, color="#999999"))
+            #graph.add_edge(pydot.Edge(primary_node, child_node, color="#999999"))
 
             # add invisible edge to opposite node, create circle
             curr_index = host_list.index(hostname+'.'+env)
-            opposite_index = curr_index + midpoint
+            #print('curr index %s' % curr_index)
+            if curr_index >= midpoint:
+                opposite_index = curr_index - midpoint
 
-            if opposite_index > len(host_list):
-                opposite_index = max(host_list)
-            print(host_list)
-            print(curr_index)
-            print(opposite_index)
-            print('===========')
+                # add edge to opposite node
+                graph.add_edge(pydot.Edge(child_node, host_list[opposite_index], style="invis"))
+
+                # add edge to neighbor to create visual space
+                #graph.add_edge(pydot.Edge(child_node, host_list[curr_index - 1], style="line"))
+
+               # if not curr_index == host_list.index(host_list[-1]):
+                 #   graph.add_edge(pydot.Edge(child_node, host_list[curr_index + 1], style="line"))
+
+
+                #print('oppos %s' % opposite_index)
+                #print(host_list[opposite_index])
+
+            #if opposite_index > len(host_list):
+            #    opposite_index = max(host_list)
+            #print(host_list)
+            #print(curr_index)
+            #print(opposite_index)
+            #print('===========')
             #print(curr_index)
 
     # for hostname in hosts_hash:
@@ -146,4 +176,4 @@ def generate_graph(json_dir, graph_format, sel_type, sel_value):
     #     graph.add_node(host_node)
     #     graph.add_edge(pydot.Edge(primary_node, host_node, color="#999999"))
 
-    graph.write_png('images/'+sel_value+'.png')
+    graph.write_png('images/'+sel_value+'.png', prog='neato')
