@@ -12,11 +12,11 @@ def get_node_color(env):
     ''' get color of each node according to environment '''
     if env == 'prod':
         node_color = '#e24d4d'
-    elif env == 'tx':
+    elif env == 'eu':
         node_color = 'grey'
     elif env == 'dmz':
         node_color = '#cc99ff'
-    elif env == 'dev':
+    elif env == 'njo':
         node_color = '#c4ffaa'
     elif env == 'test':
         node_color = '#66ffff'
@@ -77,9 +77,11 @@ def generate_graph(json_dir, graph_format, sel_type, sel_value):
     creates a graph of a selected Puppet Role or Class with all attached/related hostnames
     Usage: generate_graph('/tmp/my_jsons', 'png', 'role', 'webserver')
     '''
-    hosts_hash = {}
+    #hosts_hash = {}
+    env_hash = {}
+    host_list = []
 
-
+    node_count = 0 # total # of nodes in graph
 
     for filename in glob.glob(json_dir+'/*'):
         with open(filename) as json_data:
@@ -95,21 +97,53 @@ def generate_graph(json_dir, graph_format, sel_type, sel_value):
 
             # if hostname json matches selected Role, add to host_list
             if sel_value in search_val:
-                hosts_hash[hostname] = {'env':env}
+                #hosts_hash[hostname] = {'env':env}
+                # @@@
+                if not env in env_hash:
+                    env_hash[env] = []
+                env_hash[env].append(hostname)
 
-    # sort hosts_hash by ENV
-    hosts_hash = OrderedDict(sorted(hosts_hash.items(), key=lambda x: x[1]))
+                # add to flat Hostname list
+                host_list.append(hostname+'.'+env)
 
+            # arrange all hostames alphabetically for each ENV 
+            for key in env_hash:
+                env_hash[key].sort()
+
+    #total_nodes = len(host_list)   # total # of child nodes
+    midpoint = (len(host_list) - 1)/2   # calculates mid
+    print('total len: %s' % len(host_list))
     # now graph it
     graph = pydot.Dot(graph_type='graph', graph_name='XXI')
     primary_node = pydot.Node("%s" % '"{0}"'.format(sel_value), style='filled', shape='egg', fillcolor='white')
     graph.add_node(primary_node)
 
-    for hostname in hosts_hash:
-        env = hosts_hash[hostname]['env']
+    for env in env_hash:
         node_color = get_node_color(env)
-        host_node = pydot.Node("%s" % hostname, style="filled", shape='box', fillcolor=node_color)
-        graph.add_node(host_node)
-        graph.add_edge(pydot.Edge(primary_node, host_node, color="#999999"))
+        for hostname in env_hash[env]:
+            child_node = pydot.Node("%s" % hostname+'.'+env, style="filled", shape='box', fillcolor=node_color)
+            graph.add_node(child_node)
+            graph.add_edge(pydot.Edge(primary_node, child_node, color="#999999"))
 
-    graph.write_png(sel_value+'.png')
+            # add invisible edge to opposite node, create circle
+            curr_index = host_list.index(hostname+'.'+env)
+            opposite_index = curr_index + midpoint
+
+            if opposite_index > len(host_list):
+                opposite_index = max(host_list)
+            print(host_list)
+            print(curr_index)
+            print(opposite_index)
+            print('===========')
+            #print(curr_index)
+
+    # for hostname in hosts_hash:
+    
+    #     env = hosts_hash[hostname]['env']
+    #     # print("%s, %s" % (hostname, env))
+    #     node_color = get_node_color(env)
+    #     host_node = pydot.Node("%s" % hostname, style="filled", shape='box', fillcolor=node_color)
+    #     graph.add_node(host_node)
+    #     graph.add_edge(pydot.Edge(primary_node, host_node, color="#999999"))
+
+    graph.write_png('images/'+sel_value+'.png')
