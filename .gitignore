@@ -3,3 +3,4 @@ dora/*.pyc
 *.png
 *.svg
 *.pyc
+images/*
