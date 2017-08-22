@@ -5,8 +5,6 @@ from __future__ import print_function
 import glob
 import json
 import pydot
-import plotly.plotly
-import plotly.figure_factory as ff
 from collections import OrderedDict
 
 #---------------------------------------------------------------------------
@@ -117,7 +115,36 @@ def generate_graph_role_class(json_dir, graph_format, sel_type, sel_value):
             # arrange all hostames alphabetically for each ENV 
             for key in env_hash:
                 env_hash[key].sort()
- 
+    #print(host_list)
+    # now graph it
+    graph = pydot.Dot(graph_type='graph', 
+                      label='Puppet %s: %s' % (sel_type.title(), sel_value), 
+                      labelloc='top',
+                      fontsize=20,
+                      labelfontname='serif',
+                      labelfontcolor='blue',
+                      width=1,
+                      orientation='portrait',
+                      #concentrate='true',
+                      #size="1,3",
+                      #fontname="serif",
+                      page='1',
+                     # lwidth='1', # del
+                      rankdir='LR', 
+                     # graph_layout='shell', 
+                      #pad=".2"
+                      )
+
+    primary_node = pydot.Node("%s" % '"{0}"'.format(sel_value), 
+                              fontname="serif",
+                              fontsize=15,
+                              style='filled', 
+                              shape='oval', 
+                              fillcolor='white'
+                              )
+
+    #graph.add_node(primary_node)
+
     for env in env_hash:
         node_color = get_node_color(env)
         for hostname in env_hash[env]:
@@ -172,7 +199,7 @@ def generate_graph_role_class(json_dir, graph_format, sel_type, sel_value):
     #     host_node = pydot.Node("%s" % hostname, style="filled", shape='box', fillcolor=node_color)
     #     graph.add_node(host_node)
     #     graph.add_edge(pydot.Edge(primary_node, host_node, color="#999999"))
-    # print(host_list)
-    # # available graphviz engines:
-    # # circo, dot, fdp, neato, osage, sfdp, twopi, Tools
-    # graph.write_png('images/'+sel_value+'.png', prog='dot')
+    print(host_list)
+    # available graphviz engines:
+    # circo, dot, fdp, neato, osage, sfdp, twopi, Tools
+    graph.write_png('images/'+sel_value+'.png', prog='dot')

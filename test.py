@@ -1,43 +1,24 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-import pydot
-import graphviz
 
-graph = pydot.Dot(graph_type='graph')
+import plotly
+import plotly.plotly as py
+import plotly.graph_objs as go
+import plotly.figure_factory as ff
+import numpy as np
 
-node_a = pydot.Node("Node A", style="filled", fillcolor="red")
-node_b = pydot.Node("Node B", style="filled", fillcolor="green")
-node_c = pydot.Node("Node C", style="filled", fillcolor="#0000ff")
-node_d = pydot.Node("Node D", style="filled", fillcolor="#976856")
+data_matrix = [['Country', 'Year', 'Population'],
+               ['United States', 2000, 282200000],
+               ['Canada', 2000, 27790000],
+               ['United States', 2005, 295500000],
+               ['Canada', 2005, 32310000],
+               ['United States', 2010, 309000000],
+               ['Canada', 2010, 34000000]]
 
-graph.add_node(node_a)
-graph.add_node(node_b)
-graph.add_node(node_c)
-graph.add_node(node_d)
+table = ff.create_table(data_matrix)
 
-graph.add_edge(pydot.Edge(node_a, node_b))
-graph.add_edge(pydot.Edge(node_b, node_c))
-graph.add_edge(pydot.Edge(node_c, node_d))
 
-edge = pydot.Edge(node_d, node_a)
-edge.set_label("and back we go again")
-edge.set_labelfontcolor("#009933")
-edge.set_fontsize("10.0")
-edge.set_color("blue")
-graph.add_edge(edge)
 
-# for i in range(4):
-#     edge = pydot.Edge("king", "lord%d" % i)
-#     graph.add_edge(edge)
-
-# vassal_num = 0
-# for i in range(4):
-#     for j in range(7):
-#         edge = pydot.Edge("lord%d" % i, "vassal%d" % vassal_num)
-#         graph.add_edge(edge)
-#         vassal_num = vassal_num + 1
-
-#graph.write_png('example1_graph.svg')
-#graph.write_svg('test.svg')
-string = graph.create_svg()
-print string
+plotly.offline.plot(table, auto_open=False, filename='role.html')
+# py.image.save_as(table, filename='blaaaaa.png')
